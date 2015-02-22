@@ -135,8 +135,140 @@ void initOptable(){
 		//ofile<<s1<<" "<<s2<<" "<<s3<<"\n";
 	}
 }
+void traverseData(string addr){
+	// the addr is assumed to be in hexadecimal
+	cout<<"incoming address "<<addr<<endl;
+	int idx = hex2dec(addr);
+	cout<<"idx "<<idx<<endl;
+	string shrtAddr= addr.substr(2,4);
+	cout<<"shrtAdr "<<shrtAddr<<endl;
+	if(mem[idx][0]!='G' && mem[idx][1]!='G'){
+		
+		
+		if (memType[idx]!=udef && memType[idx]!=code){
+			// ldch -> byte
+			// stch -> resb
+			// lda, -> word
+			// sta, -> resw
+			cout<<"in data"<<endl;
+			string data="";
+			string dataStr;
+			string label = "L";
+			label += shrtAddr;
+			string opnm;
+			// belongs to data section
+			// loc -> idx
+			// opname -> based on memType
+			// value is calculate on the basis of  
+			// if word then directly use the value of the 3 bytes - hex to binary to decimal
+			if(memType[idx]==word){
+				data+=mem[idx][0];
+				data+=mem[idx][1];
+				data+=mem[idx+1][0];
+				data+=mem[idx+1][1];
+				data+=mem[idx+2][2];
+				data+=mem[idx+2][2];
+				int dataInt = hex2dec(data);
+				dataStr =""+dataInt;
+				opnm="WORD";
+			
+				struct stmnt st( idx, label, opnm, dataStr);
+				stmnts.push_back(st);
+				traverseData("00"+dec2hex(idx+3));
+				return;
+			}
+			else if(memType[idx]==byte){
+				int ct=1;
+				int j=idx+1;
+				while(j<maxProgAddrInt){
+					if(memRefer[j]==false){
+						ct++;
+						j++;
+					}
+					else break;
+				}
+				
+				for(int i=idx; i<(idx+ct); i++){
+					data+=mem[i][0];
+					data+=mem[i][1];
+				}
+				dataStr="X'";
+				dataStr+=data;
+				dataStr+="'";
+				opnm="BYTE";
+				
+				struct stmnt st( idx, label, opnm, dataStr);
+				stmnts.push_back(st);
+				traverseData("00"+dec2hex(idx+ct));
+				return;
+				
+			}
+			else if(memType[idx]==resw){
+				int ct=1;
+				int j=idx+1;
+				while(j<maxProgAddrInt){
+					if(memRefer[j]==false){
+						ct++;
+						j++;
+					}
+					else break;
+				}
+				if(ct%3!=0)cout<<"wrong number of res words"<<endl;
+				ct/=3;
+				
+				dataStr=""+ct;
+				opnm="RESW";
+				
+				struct stmnt st( idx, label, opnm, dataStr);
+				stmnts.push_back(st);
+				traverseData("00"+dec2hex(idx+(3*ct)));
+				return;
+				
+			}
+			else if(memType[idx]==resb){
+				int ct=1;
+				int j=idx+1;
+				while(j<maxProgAddrInt){
+					if(memRefer[j]==false){
+						ct++;
+						j++;
+					}
+					else break;
+				}
+								
+				dataStr=""+ct;
+				opnm="RESB";
+				
+				struct stmnt st( idx, label, opnm, dataStr);
+				stmnts.push_back(st);
+				traverseData("00"+dec2hex(idx+ct));
+				return;
+			}
+			// make  a ctr of number of bytes in dec
+			// increment until we in memory get a sentinel value 
+			// basically until the other label is not referred 
+			// upper bound this loop with maxAddressPossible
+			// if resw then ctr/24 is value
+			// if resb then ctr is value
+			// if byte then ctr,- use c based only
+			// make a stmnt object 
+			// add it to vector 
+			// increment by length of data
+		}
+		else{
+			
+			int ab =idx+3;
+			
+			string a = "00"+dec2hex1(ab);
+			cout<<a<<endl;
+			traverseData(a);
+		}
+	}
+	
+}
 void traverse(string addr){ 
 	// the addr is assumed to be in hexadecimal
+	cout<<"incoming address "<<addr<<endl;
 	int idx = hex2dec(addr);
 	cout<<"idx "<<idx<<endl;
 	string shrtAddr= addr.substr(2,4);
@@ -306,6 +438,7 @@ void traverse(string addr){
 			int opndInt=hex2dec(opndAddr);
 			cout<<opndInt<<endl;
 			memType[idx]=code;
+			if(opName=="RSUB")return;
 			memRefer[opndInt]=true;
 			cout<<otyp<<endl;
 			if(otyp=="2" ){
@@ -323,7 +456,7 @@ void traverse(string addr){
 			}
 			else {
 				cout<<"hello jump"<<endl;
-				traverse(opndAddr);
+				traverse("00"+opndAddr);
 			}
 			// depending on the type of current instruction 
 			
@@ -434,6 +567,12 @@ int main(){
 	firstExecAdd = tr.substr(1,6);
 	cout<<firstExecAdd<<endl;
 	traverse(firstExecAdd);
+	cout<<endl;
+	cout<<endl;
+	cout<<endl;
+	cout<<endl;
+	
+	traverseData(firstExecAdd);
 	writeProgram();
 	
 }
