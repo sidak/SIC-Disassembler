@@ -43,6 +43,36 @@ int hex2dec(char *str,int l){
     }
     return n;
 }
+string dec2hex(int j){
+	int bin[25];
+	int i;
+	for(i=0;j>0;i++)
+    {
+        bin[i]=j%16;
+        j=j/16;
+    }
+
+    i--;
+    string ans ="";
+    for(;i>=0;i--)
+    {
+        if(bin[i]==10)
+                ans+="A";
+        else if(bin[i]==11)
+                ans+="B";
+        else if(bin[i]==12)
+                ans+="C";
+        else if(bin[i]==13)
+                ans+="D";
+        else if(bin[i]==14)
+                ans+="E";
+        else if(bin[i]==15)
+                ans+="F";
+        else
+            ans+=bin[i];
+    }
+}
+
 void traverse(string addr){ 
 	// the addr is assumed to be in hexadecimal
 	int idx = hex2dec(addr);
@@ -65,6 +95,9 @@ void traverse(string addr){
 			// if resw then ctr/24 is value
 			// if resb then ctr is value
 			// if byte then ctr, then think if x based or c based
+			// make a stmnt object 
+			// add it to vector 
+			// increment by length of data
 		}
 		else{
 			
@@ -83,9 +116,13 @@ void traverse(string addr){
 			string opndAddr= opnd.substr(1,4);
 			string label = "L";
 			label+=shrtAddr;
+			
 			// check if index based addressing 
-			//
-			// opnd+=",X";
+			int diff = opndAddr[0]-'8';
+			if(diff >=0){
+				opnd+=",X";
+			}
+			
 			// if rsub inst , clear opnd to a tab;
 			if(opName =="RSUB")opnd="\t";
 			
@@ -102,7 +139,7 @@ void traverse(string addr){
 			// if instruction is either a jump inst or jsub inst
 			// traverse(opnd.substr(1,4));
 			
-			traverse(dec2hex(idx+3));
+			traverse("00"+dec2hex(idx+3));
 			
 		}
 		
