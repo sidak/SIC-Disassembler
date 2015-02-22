@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <vector>
 #include <map>
+#include <algorithm>
 using namespace std;
 #define maxMem 66000
 
@@ -285,10 +286,32 @@ void traverse(string addr){
 	
 	
 }
+struct less_than_key
+{
+    inline bool operator() (const stmnt& struct1, const stmnt& struct2)
+    {
+        return (struct1.loc < struct2.loc);
+    }
+};
 void writeProgram(){
 	// make a comparator based on locn 
 	// sort the vector
-	// output to file line by line 
+	// output to file line by line
+	ofstream myfile;
+    myfile.open ("output.txt");
+    sort(stmnts.begin(), stmnts.end(), less_than_key()); 
+	int sz = stmnts.size();
+	for(int i=0; i<sz; i++){
+		struct stmnt st = stmnts[i];
+		if(memRefer[st.loc]){
+			myfile<<st.label<<"\t";
+		}
+		myfile<<st.opcode<<"\t";
+		myfile<<st.opnd<<"\n";
+	}
+	
+	myfile.close();
+	
 }
 int main(){
 	char * filename=NULL;
