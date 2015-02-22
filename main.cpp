@@ -1,10 +1,12 @@
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <stdio.h>
 #include <ctype.h>
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <stdlib.h>
 using namespace std;
 #define maxMem 66000
 
@@ -54,6 +56,42 @@ int hex2dec(char *str,int l){
     }
     return n;
 }
+string dec2hex1(int x){
+	int n,r[10],i=0,number,j=0;
+	number=x;
+	
+
+	while(number>0)
+	{
+		r[i]=number%16;
+		number=number/16;
+		i++;
+		j++;
+	}
+	string ans ="";
+	for(i=j-1;i>=0;i--)
+	{
+		if(r[i]==10)
+		ans+='A';
+		else if(r[i]==11)
+		ans+='B';
+		else if(r[i]==12)
+		ans+='C';
+		else if(r[i]==13)
+		ans+='D';
+		else if(r[i]==14)
+		ans+='E';
+		else if(r[i]==15)
+		ans+='F';
+		else{
+		
+		ans+=(r[i]+'0');
+		}
+	}
+	cout<<"ans "<<ans<<endl;
+	return ans;
+	
+}
 string dec2hex(int j){
 	int bin[25];
 	int i;
@@ -85,24 +123,29 @@ string dec2hex(int j){
     return ans;
 }
 void initOptable(){
+	//ofstream ofile("opcodesPrint.txt");
 	ifstream infile("opcodes.txt");
 	string s1 ,s2,s3;
 	while(!infile.eof()){
-		cin>>s1>>s2>>s3;
+		infile>>s1>>s2>>s3;
 		struct opn op ;
 		op.name=s1;
 		op.type=s3;
 		optable.insert(pair<string, struct opn > (s2,op));
+		//ofile<<s1<<" "<<s2<<" "<<s3<<"\n";
 	}
 }
 void traverse(string addr){ 
 	// the addr is assumed to be in hexadecimal
 	int idx = hex2dec(addr);
+	cout<<"idx "<<idx<<endl;
 	string shrtAddr= addr.substr(2,4);
+	cout<<"shrtAdr "<<shrtAddr<<endl;
 	if(mem[idx][0]!='G' && mem[idx][1]!='G'){
 		
 		if(memType[idx]==code){
 			// exit if it is already seen code
+			cout<<"already code"<<endl;
 			return;
 		}
 		else if (memType[idx]!=udef && memType[idx]!=code){
@@ -110,7 +153,7 @@ void traverse(string addr){
 			// stch -> resb
 			// lda, -> word
 			// sta, -> resw
-			
+			cout<<"in data"<<endl;
 			string data="";
 			string dataStr;
 			string label = "L";
@@ -216,19 +259,25 @@ void traverse(string addr){
 			// increment by length of data
 		}
 		else{
-			
+			cout<<"in code"<<endl;
 			string opcd= "";
 			string otyp;
 			opcd+= mem[idx][0];
-			opcd+=mem[idx][1];
+			opcd+=mem[idx][1];	
+			
+			cout<<idx<<endl;
+			cout<< mem[idx][0]<<" "<<mem[idx][1]<<endl;;
+			cout<<opcd<<endl;
 			it = optable.find(opcd);
 			string opName;
 			if(it!=optable.end()){
 				opName = (it->second).name;
 				otyp=(it->second).type;
+				cout<<opName<<" "<<otyp<<endl;
 			}
 			else{
-				cout<<"no such opcode"<<endl;
+				
+				cout<<"no such opcode "<<opcd<< "with idx "<<idx<<endl;
 			}
 			string shrtAddr= addr.substr(2,4);
 			// add the address bits from the next instruction;
@@ -253,10 +302,12 @@ void traverse(string addr){
 			
 			struct stmnt st(idx, label, opName, opnd);
 			stmnts.push_back(st);
-			
+			cout<<idx<<" "<<label<<" "<<opName<<" "<<opnd<<endl;
 			int opndInt=hex2dec(opndAddr);
+			cout<<opndInt<<endl;
 			memType[idx]=code;
 			memRefer[opndInt]=true;
+			cout<<otyp<<endl;
 			if(otyp=="2" ){
 				memType[opndInt]=byte;
 			}
@@ -268,8 +319,10 @@ void traverse(string addr){
 			}
 			else if (otyp=="5"){
 				memType[opndInt]=resw;
+				cout<<"resw"<<endl;
 			}
 			else {
+				cout<<"hello jump"<<endl;
 				traverse(opndAddr);
 			}
 			// depending on the type of current instruction 
@@ -277,8 +330,13 @@ void traverse(string addr){
 			
 			// if instruction is either a jump inst or jsub inst
 			// traverse(opnd.substr(1,4));
-			
-			traverse("00"+dec2hex(idx+3));
+			cout<<idx<<endl;
+			int ab =idx+3;
+			//string b = dec2hex1(ab);
+			//cout<<b<<endl;
+			string a = "00"+dec2hex1(ab);
+			cout<<a<<endl;
+			traverse(a);
 			return;
 		}
 		
@@ -333,9 +391,14 @@ int main(){
 	string hr, tr;
 	getline(infile, hr);
 	progName = hr.substr(1, 6);
+	cout<<progName<<endl;
+	
 	startAdd = hr.substr(7,6);
+	cout<<startAdd<<endl;
 	progLen = hr.substr(13,6);
+	cout<<progLen<<endl;
 	maxProgAddrInt= hex2dec(startAdd) + hex2dec(progLen);
+	cout<<maxProgAddrInt<<endl;
 	
 	getline(infile, tr);
 	
@@ -343,22 +406,33 @@ int main(){
 	int memStIdx, loopLen;
 	while(tr[0]!='E'){
 		recStartAdd=tr.substr(1,6);
+		cout<<recStartAdd<<endl;
 		recLen = tr.substr(7,2);
+		cout<<recLen <<endl;
 		// initialise the mem array with the object code
 		memStIdx = hex2dec(recStartAdd);
 		loopLen=(2*hex2dec(recLen));
+		cout<<memStIdx<<" "<<loopLen<<endl;
 		int j= memStIdx;
 		int i=0;
 		while(i<loopLen){
+			cout<<"i "<<i<<" j "<<j<<endl;
 			mem[j][0]=tr[9+i];
 			i++;
+			cout<<"mem 0 "<<mem[j][0]<<endl;
+			cout<<"i "<<i<<" j "<<j<<endl;
+			
 			mem[j][1]=tr[9+i];
 			i++;
+			cout<<"i "<<i<<" j "<<j<<endl;
+			cout<<"mem 1 "<<mem[j][1]<<endl;
 			j++;
+			cout<<"i "<<i<<" j "<<j<<endl;
 		}
 		getline(infile, tr); 
 	}
 	firstExecAdd = tr.substr(1,6);
+	cout<<firstExecAdd<<endl;
 	traverse(firstExecAdd);
 	writeProgram();
 	
