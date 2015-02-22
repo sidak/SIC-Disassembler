@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <vector>
+#include <map>
 using namespace std;
 #define maxMem 66000
 
@@ -22,6 +23,11 @@ class stmnt{
 	}
 	
 };
+struct opn{
+	string name;
+	string type;
+};
+map <string, struct opn > optable;
 vector < stmnt > stmnts;
 int hex2dec(string str){
     int l=str.length();
@@ -71,8 +77,19 @@ string dec2hex(int j){
         else
             ans+=bin[i];
     }
+    return ans;
 }
-
+void initOptable(){
+	ifstream infile;
+	string s1 ,s2,s3;
+	while(!infile.eof()){
+		cin>>s1>>s2>>s3;
+		struct opn op ;
+		op.name=s1;
+		op.type=s3;
+		optable.insert(pair<string, struct opn > (s2,op));
+	}
+}
 void traverse(string addr){ 
 	// the addr is assumed to be in hexadecimal
 	int idx = hex2dec(addr);
@@ -87,14 +104,25 @@ void traverse(string addr){
 			// opname -> based on memType
 			// value is calculate on the basis of  
 			// if word then directly use the value of the 3 bytes - hex to binary to decimal
-			
+			if(memType[idx]==word){
+				
+			}
+			else if(memType[idx]==byte){
+				
+			}
+			else if(memType[idx]==resw){
+				
+			}
+			else if(memType[idx]==resb){
+				
+			}
 			// make  a ctr of number of bytes in dec
 			// increment until we in memory get a sentinel value 
 			// basically until the other label is not referred 
 			// upper bound this loop with maxAddressPossible
 			// if resw then ctr/24 is value
 			// if resb then ctr is value
-			// if byte then ctr, then think if x based or c based
+			// if byte then ctr,- use c based only
 			// make a stmnt object 
 			// add it to vector 
 			// increment by length of data
@@ -164,6 +192,7 @@ int main(){
 		memType[i]= udef;
 		memRefer[i]=false;
 	}
+	initOptable();
 	ifstream infile(filename);
 	string hr, tr;
 	getline(infile, hr);
@@ -172,6 +201,7 @@ int main(){
 	progLen = hr.substr(13,6);
 	
 	getline(infile, tr);
+	
 	string recStartAdd, recLen; 
 	int memStIdx, loopLen;
 	while(tr[0]!='E'){
