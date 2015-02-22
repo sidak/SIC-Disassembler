@@ -2,9 +2,19 @@
 #include <fstream>
 #include <stdio.h>
 #include <ctype.h>
+#include <vector>
 using namespace std;
-char mem[66000][2];
+#define maxMem 66000
 
+char mem[maxMem][2];
+enum typ{ udef, code, resb, resw, byte, word};
+typ memType[maxMem];
+bool memRefer[maxMem];
+struct stmnt{
+	int loc;
+	string label, opcode, opnd ;
+};
+vector < stmnt > stmnts;
 int hex2dec(string str){
     int l=str.length();
     int n=0,d;
@@ -25,7 +35,12 @@ int hex2dec(char *str,int l){
     }
     return n;
 }
-
+void traverse(string addr){
+	
+}
+void printProgram(){
+	
+}
 int main(){
 	char * filename=NULL;
 	string progName, progLen, startAdd, firstExecAdd;
@@ -36,6 +51,8 @@ int main(){
 	for(int i=0; i<66000; i++){
 		mem[i][0]='G';
 		mem[i][1]='G';
+		memType[i]= udef;
+		memRefer[i]=false;
 	}
 	ifstream infile(filename);
 	string hr, tr;
@@ -65,5 +82,7 @@ int main(){
 		getline(infile, tr); 
 	}
 	firstExecAdd = tr.substr(1,6);
+	traverse(firstExecAdd);
+	printProgram();
 	
 }
