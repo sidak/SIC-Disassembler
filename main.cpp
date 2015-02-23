@@ -12,9 +12,7 @@
 using namespace std;
 
 #define maxMem 66000 	// since max memory size of sic machine is 2^15
-
-#define inpFile "input.txt"
-#define outFile "output5.txt"
+#define outFile "out.txt"
 #define opFile "opcodes.txt"
 // ------------------ CLASSES & STRUCTS --------------- //
 
@@ -37,12 +35,22 @@ class stmnt{
 };
 
 struct opn{
+	/*
+	 * This struct corresponds to an operation
+	 * supported by SIC Machine
+	 * 
+	 */
 	string name;
 	char type;
 };
 
 struct less_than_key
 {
+	/*
+	 * This struct is used as a comparator 
+	 * the struct stmmt
+	 * 
+	 */
     inline bool operator() (const stmnt& struct1, const stmnt& struct2)
     {
         return (struct1.loc < struct2.loc);
@@ -50,21 +58,31 @@ struct less_than_key
 };
 
 // ------------------ GLOBAL VARIABLES ---------------- //
-char mem[maxMem][2];
-enum stype{ udef,code, byte, resb, word, resw};
 
-stype memType[maxMem];
-bool memRefer[maxMem];
-int maxProgAddrInt;
+char mem[maxMem][2]; // the memory where the code and data will be loaded in
+
+enum stype{ udef,code, byte, resb, word, resw}; // the type of statement
+
+stype memType[maxMem]; // an array for storing memType
+
+bool memRefer[maxMem]; // an array to check if code or data has been referred
+
+int maxProgAddrInt; 
 
 string progName, progLen, startAdd, firstExecAdd;
 
-map <string, struct opn > optable;
-vector < stmnt > stmnts;
-map<string ,struct opn>::iterator it;
+map <string, struct opn > optable; // the optab with key as opcode and value as corresponding opn data
+
+vector < stmnt > stmnts; // the vector of statements
+
+map<string ,struct opn>::iterator it; // iterator to the optab
 
 // ------------------- HELPER METHODS ---------------//
+
 int hex2dec(string str){
+    /*
+     * Converts a hex string to corresponding int
+     */
     int l=str.length();
     int n=0,d;
     for(int i=0;i<l;i++){
@@ -75,26 +93,24 @@ int hex2dec(string str){
     return n;
 }
 
-int hex2dec(char *str,int l){
-    int n=0,d;
-    for(int i=0;i<l;i++){
-        if(isalpha(str[i]))d=str[i]-'A'+10;
-        else d=str[i]-'0';
-        n=n*16+d;
-    }
-    return n;
-}
 string NumberToString ( int Number )
 {
+	/*
+	 * Converts an int to a string object
+	 */
 	stringstream ss;
 	ss << Number;
 	return ss.str();
 }
-string dec2hex1(int x){
+string dec2hex1(int x)
+{
+	/*
+	 * Converts an int to a hex string
+	 */
+	
 	int r[10],i=0,number,j=0;
 	number=x;
 	
-
 	while(number>0)
 	{
 		r[i]=number%16;
@@ -106,26 +122,31 @@ string dec2hex1(int x){
 	for(i=j-1;i>=0;i--)
 	{
 		if(r[i]==10)
-		ans+='A';
+			ans+='A';
 		else if(r[i]==11)
-		ans+='B';
+			ans+='B';
 		else if(r[i]==12)
-		ans+='C';
+			ans+='C';
 		else if(r[i]==13)
-		ans+='D';
+			ans+='D';
 		else if(r[i]==14)
-		ans+='E';
+			ans+='E';
 		else if(r[i]==15)
-		ans+='F';
+			ans+='F';
 		else{
 		
-		ans+=(r[i]+'0');
+			ans+=(r[i]+'0');
 		}
 	}
 	return ans;
 	
 }
+
 void initOptable(){
+	/*
+	 * This function initialise the optab
+	 * from the opn data given in file - opFile
+	 */
 	ifstream infile(opFile);
 	string s1 ,s2;
 	char s3;
@@ -137,8 +158,13 @@ void initOptable(){
 		optable.insert(pair<string, struct opn > (s2,op));
 	}
 }
-void traverseData(string addr){
-	// the addr is assumed to be in hexadecimal
+void traverseData(string addr){ // the addr is assumed to be in hexadecimal
+	
+	/*
+	 * This function is used to iterate over
+	 * the possible data statements
+	 */
+	
 	int idx = hex2dec(addr);
 	string shrtAddr= addr.substr(2,4);
 	if(idx<maxProgAddrInt){
@@ -252,8 +278,12 @@ void traverseData(string addr){
 	}
 	
 }
-void traverse(string addr){ 
-	// the addr is assumed to be in hexadecimal
+void traverse(string addr){ // the addr is assumed to be in hexadecimal
+	/*
+	 * This function is used to iterate over
+	 * the possible data statements
+	 */
+	
 	int idx = hex2dec(addr);
 	string shrtAddr= addr.substr(2,4);
 	if(mem[idx][0]!='G' && mem[idx][1]!='G'){
@@ -351,8 +381,13 @@ void traverse(string addr){
 }
 
 void writeProgram(){
+	/*
+	 * This function is used to write the
+	 * disassembled statements into the output file
+	 */
+	 
 	ofstream myfile;
-    myfile.open (outFile);
+	myfile.open(outFile);
     sort(stmnts.begin(), stmnts.end(), less_than_key());
     
     string firstLabel="L";
@@ -377,29 +412,39 @@ void writeProgram(){
 	
 }
 int main(){
-	char * filename=NULL;
 	
+	cout<<"SIC Disassembler\n"<<endl;
+	cout<<"\t Made by : "<<endl;
+	cout<<"\t Sidak Pal Singh "<<endl;
+	cout<<"\t 13114064 \n"<<endl;
 	
-	//cout<<"Enter the name of the object File "<<endl;
-	//scanf("%s",filename);
-	// use argv for it 
-	// initialise mem 
+	// initialise the memory for code and data
 	for(int i=0; i<maxMem; i++){
 		mem[i][0]='G';
 		mem[i][1]='G';
 		memType[i]= udef;
 		memRefer[i]=false;
 	}
+	// intialise the optab
 	initOptable();
-	ifstream infile(inpFile);
+	
+	// get file for input
+	string fname;
+	cout<<"Enter the name of the input file "<<endl;
+	cin>>fname;
+	const char *cstr = fname.c_str();
+
+	ifstream infile(cstr);
 	string hr, tr;
+	
+	// read header record
 	getline(infile, hr);
 	progName = hr.substr(1, 6);
-	
 	startAdd = hr.substr(7,6);
 	progLen = hr.substr(13,6);
 	maxProgAddrInt= hex2dec(startAdd) + hex2dec(progLen);
 	
+	// read text records until you get the end record
 	getline(infile, tr);
 	
 	string recStartAdd, recLen; 
@@ -421,10 +466,19 @@ int main(){
 		}
 		getline(infile, tr); 
 	}
+	
+	// parse data from end record 
 	firstExecAdd = tr.substr(1,6);
+	
+	// start the visiting of instruction from the first executable instruction 
 	traverse(firstExecAdd);
 	
+	// start iterating over thedata statements
 	traverseData(firstExecAdd);
+	
+	// write the program to output file
 	writeProgram();
 	
+	cout<<"Successfully disassembled input object code"<<endl;
+	cout<<"Check \"out.txt\" file for the output"<<endl;
 }
