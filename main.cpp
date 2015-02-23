@@ -8,38 +8,62 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <string>
-using namespace std;
-#define maxMem 66000
-#define inpFile "input.txt"
-#define outFile "output3.txt"
-#define opFile "opcodes.txt"
-char mem[maxMem][2];
-enum stype{ udef,code, byte, resb, word, resw};
-enum optype{ujump=0,cjump=1,ldch=2,stch=3,lw=4,sw=5};
 
-stype memType[maxMem];
-bool memRefer[maxMem];
-int maxProgAddrInt;
+using namespace std;
+
+#define maxMem 66000 	// since max memory size of sic machine is 2^15
+
+#define inpFile "input.txt"
+#define outFile "output5.txt"
+#define opFile "opcodes.txt"
+// ------------------ CLASSES & STRUCTS --------------- //
+
 class stmnt{
+	/*
+	 * This class corresponds to a statement or 
+	 * line of code in the sic program
+	 *
+	 */   
 	public:
 		int loc;
 		string label, opcode, opnd ;
-	stmnt(int l , string lbl, string opcd, string opd){
-		loc=l;
-		label=lbl;
-		opcode=opcd;
-		opnd=opd;
-	}
+		stmnt(int l , string lbl, string opcd, string opd){
+			loc=l;
+			label=lbl;
+			opcode=opcd;
+			opnd=opd;
+		}
 	
 };
-string progName, progLen, startAdd, firstExecAdd;
+
 struct opn{
 	string name;
 	char type;
 };
+
+struct less_than_key
+{
+    inline bool operator() (const stmnt& struct1, const stmnt& struct2)
+    {
+        return (struct1.loc < struct2.loc);
+    }
+};
+
+// ------------------ GLOBAL VARIABLES ---------------- //
+char mem[maxMem][2];
+enum stype{ udef,code, byte, resb, word, resw};
+
+stype memType[maxMem];
+bool memRefer[maxMem];
+int maxProgAddrInt;
+
+string progName, progLen, startAdd, firstExecAdd;
+
 map <string, struct opn > optable;
 vector < stmnt > stmnts;
 map<string ,struct opn>::iterator it;
+
+// ------------------- HELPER METHODS ---------------//
 int hex2dec(string str){
     int l=str.length();
     int n=0,d;
@@ -67,7 +91,7 @@ string NumberToString ( int Number )
 	return ss.str();
 }
 string dec2hex1(int x){
-	int n,r[10],i=0,number,j=0;
+	int r[10],i=0,number,j=0;
 	number=x;
 	
 
@@ -98,42 +122,10 @@ string dec2hex1(int x){
 		ans+=(r[i]+'0');
 		}
 	}
-	////cin<<"ans "<<ans<<endl;
 	return ans;
 	
 }
-string dec2hex(int j){
-	int bin[25];
-	int i;
-	for(i=0;j>0;i++)
-    {
-        bin[i]=j%16;
-        j=j/16;
-    }
-
-    i--;
-    string ans ="";
-    for(;i>=0;i--)
-    {
-        if(bin[i]==10)
-                ans+="A";
-        else if(bin[i]==11)
-                ans+="B";
-        else if(bin[i]==12)
-                ans+="C";
-        else if(bin[i]==13)
-                ans+="D";
-        else if(bin[i]==14)
-                ans+="E";
-        else if(bin[i]==15)
-                ans+="F";
-        else
-            ans+=bin[i];
-    }
-    return ans;
-}
 void initOptable(){
-	//ofstream ofile("opcodesPrint.txt");
 	ifstream infile(opFile);
 	string s1 ,s2;
 	char s3;
@@ -143,36 +135,23 @@ void initOptable(){
 		op.name=s1;
 		op.type=s3;
 		optable.insert(pair<string, struct opn > (s2,op));
-		//ofile<<s1<<" "<<s2<<" "<<s3<<"\n";
 	}
 }
 void traverseData(string addr){
 	// the addr is assumed to be in hexadecimal
-	//cout<<"incoming address "<<addr<<endl;
 	int idx = hex2dec(addr);
-	//cout<<"idx "<<idx<<endl;
 	string shrtAddr= addr.substr(2,4);
-	//cout<<"shrtAdr "<<shrtAddr<<endl;
 	if(idx<maxProgAddrInt){
 		
 		
 		if (memType[idx]!=udef && memType[idx]!=code){
-			// ldch -> byte
-			// stch -> resb
-			// lda, -> word
-			// sta, -> resw
-			//cout<<"in data"<<endl;
+			
 			string data="";
 			string dataStr;
 			string label = "L";
 			label += shrtAddr;
-			//cout<<"label "<<label<<endl;
 			string opnm;
-			// belongs to data section
-			// loc -> idx
-			// opname -> based on memType
-			// value is calculate on the basis of  
-			// if word then directly use the value of the 3 bytes - hex to binary to decimal
+			
 			if(memType[idx]==word){
 				//cout<<"word av"<<endl;
 				data+=mem[idx][0];
@@ -181,18 +160,12 @@ void traverseData(string addr){
 				data+=mem[idx+1][1];
 				data+=mem[idx+2][0];
 				data+=mem[idx+2][1];
-				//cout<<mem[idx+2][0]<<" ";
-				//cout<<mem[idx+2][1]<<endl;
 				
-				//cout<<"data "<<data<<endl;
 				int dataInt = hex2dec(data);
-				//cout<<dataInt<<endl;
 				dataStr =NumberToString(dataInt);
-				//cout<<dataStr<<endl;
 				opnm="WORD";
 			
 				struct stmnt st( idx, label, opnm, dataStr);
-				//cout<<idx<<" "<<label<<" "<<opnm<<" "<<dataStr<<endl;
 				stmnts.push_back(st);
 				traverseData("00"+dec2hex1(idx+3));
 				return;
@@ -268,23 +241,12 @@ void traverseData(string addr){
 				traverseData("00"+dec2hex1(idx+ct));
 				return;
 			}
-			// make  a ctr of number of bytes in dec
-			// increment until we in memory get a sentinel value 
-			// basically until the other label is not referred 
-			// upper bound this loop with maxAddressPossible
-			// if resw then ctr/24 is value
-			// if resb then ctr is value
-			// if byte then ctr,- use c based only
-			// make a stmnt object 
-			// add it to vector 
-			// increment by length of data
+			
 		}
 		else{
 			
 			int ab =idx+3;
-			
 			string a = "00"+dec2hex1(ab);
-			//cout<<"outgoing addres"<<a<<endl;
 			traverseData(a);
 		}
 	}
@@ -292,41 +254,32 @@ void traverseData(string addr){
 }
 void traverse(string addr){ 
 	// the addr is assumed to be in hexadecimal
-	//cout<<"incoming address "<<addr<<endl;
 	int idx = hex2dec(addr);
-	//cout<<"idx "<<idx<<endl;
 	string shrtAddr= addr.substr(2,4);
-	//cout<<"shrtAdr "<<shrtAddr<<endl;
 	if(mem[idx][0]!='G' && mem[idx][1]!='G'){
 		
 		if(memType[idx]==code){
 			// exit if it is already seen code
-			//cout<<"already code"<<endl;
 			return;
 		}
 		
 		else if (memType[idx]==udef){
-			//cout<<"in code"<<endl;
+			// encountering the instruction for the first time;
 			string opcd= "";
 			char otyp;
 			opcd+= mem[idx][0];
 			opcd+=mem[idx][1];	
 			
-			//cout<<idx<<endl;
-			//cout<<opcd<<endl;
 			it = optable.find(opcd);
 			string opName;
 			if(it!=optable.end()){
 				opName = (it->second).name;
 				otyp=(it->second).type;
-				//cout<<opName<<" "<<otyp<<endl;
 			}
 			else{
-				
-				//cout<<"no such opcode "<<opcd<< "with idx "<<idx<<endl;
+				cout<<"no such opcode "<<opcd<< "with idx "<<idx<<endl;
 			}
 			string shrtAddr= addr.substr(2,4);
-			// add the address bits from the next instruction;
 			string opnd= "L";
 			opnd+=mem[idx+1][0];
 			opnd+=mem[idx+1][1];
@@ -352,28 +305,19 @@ void traverse(string addr){
 				opnd+=",X";
 			}
 			
-			/*int diff = opndAddr[0]-'8';
-			int opndInt;
-			if(diff >=0){
-				opnd+=",X";
-				opndAddr[0]=opndAddr[0]-'8';
-			}
-			int opndInt=hex2dec(opndAddr);
-			*/
-			// if rsub inst , clear opnd to a tab;
+			// if rsub inst , clear the operand;
 			if(opName =="RSUB")opnd="\t";
 			
 			struct stmnt st(idx, label, opName, opnd);
 			stmnts.push_back(st);
-			//cout<<idx<<" "<<label<<" "<<opName<<" "<<opnd<<endl;
-			//cout<<opndInt<<endl;
+			
 			memType[idx]=code;
+			
 			if(opName=="RSUB")return;
+			
 			memRefer[opndInt]=true;
-			//cout<<otyp<<endl;
 			if(otyp=='2' ){
 				if(memType[opndInt]==udef)
-				//if(memType[opndInt]!=resb && memType[opndInt]!=resw)
 				memType[opndInt]=byte;
 			}
 			else if (otyp=='3'){
@@ -389,23 +333,14 @@ void traverse(string addr){
 				if(memType[opndInt]==udef){
 					memType[opndInt]=resw;
 				}
-				//cout<<"resw"<<endl;
 			}
 			else if(otyp=='1' || otyp=='0') {
-				//cout<<"hello jump"<<endl;
 				traverse("00"+opndAddr);
 			}
-			//cout<<"the opnd of indx "<<dec2hex1(opndInt)<<" memtype is "<<memType[opndInt]<<endl;
-			// depending on the type of current instruction 
 			
-			
-			// if instruction is either a jump inst or jsub inst
-			// traverse(opnd.substr(1,4));
 			int ab =idx+3;
-			//string b = dec2hex1(ab);
-			//cout<<b<<endl;
+			
 			string a = "00"+dec2hex1(ab);
-			//cout<<a<<endl;
 			traverse(a);
 			return;
 		}
@@ -414,17 +349,8 @@ void traverse(string addr){
 	
 	
 }
-struct less_than_key
-{
-    inline bool operator() (const stmnt& struct1, const stmnt& struct2)
-    {
-        return (struct1.loc < struct2.loc);
-    }
-};
+
 void writeProgram(){
-	// make a comparator based on locn 
-	// sort the vector
-	// output to file line by line
 	ofstream myfile;
     myfile.open (outFile);
     sort(stmnts.begin(), stmnts.end(), less_than_key());
@@ -465,19 +391,14 @@ int main(){
 		memRefer[i]=false;
 	}
 	initOptable();
-	//ifstream infile(filename);
 	ifstream infile(inpFile);
 	string hr, tr;
 	getline(infile, hr);
 	progName = hr.substr(1, 6);
-	//cout<<progName<<endl;
 	
 	startAdd = hr.substr(7,6);
-	//cout<<startAdd<<endl;
 	progLen = hr.substr(13,6);
-	//cout<<progLen<<endl;
 	maxProgAddrInt= hex2dec(startAdd) + hex2dec(progLen);
-	//cout<<maxProgAddrInt<<endl;
 	
 	getline(infile, tr);
 	
@@ -485,41 +406,25 @@ int main(){
 	int memStIdx, loopLen;
 	while(tr[0]!='E'){
 		recStartAdd=tr.substr(1,6);
-		//cout<<recStartAdd<<endl;
 		recLen = tr.substr(7,2);
-		//cout<<recLen <<endl;
 		// initialise the mem array with the object code
 		memStIdx = hex2dec(recStartAdd);
 		loopLen=(2*hex2dec(recLen));
-		//cout<<memStIdx<<" "<<loopLen<<endl;
 		int j= memStIdx;
 		int i=0;
 		while(i<loopLen){
-			//cout<<"i "<<i<<" j "<<j<<endl;
 			mem[j][0]=tr[9+i];
 			i++;
-			//cout<<"mem 0 "<<mem[j][0]<<endl;
-			//cout<<"i "<<i<<" j "<<j<<endl;
-			
 			mem[j][1]=tr[9+i];
 			i++;
-			//cout<<"i "<<i<<" j "<<j<<endl;
-			//cout<<"mem 1 "<<mem[j][1]<<endl;
 			j++;
-			//cout<<"i "<<i<<" j "<<j<<endl;
 		}
 		getline(infile, tr); 
 	}
 	firstExecAdd = tr.substr(1,6);
-	//cout<<firstExecAdd<<endl;
 	traverse(firstExecAdd);
-	//cout<<endl;
-	//cout<<endl;
-	//cout<<endl;
-	//cout<<endl;
 	
 	traverseData(firstExecAdd);
 	writeProgram();
 	
 }
-	
