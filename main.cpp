@@ -10,7 +10,9 @@
 #include <string>
 using namespace std;
 #define maxMem 66000
-
+#define inpFile "input.txt"
+#define outFile "output3.txt"
+#define opFile "opcodes.txt"
 char mem[maxMem][2];
 enum stype{ udef,code, byte, resb, word, resw};
 enum optype{ujump=0,cjump=1,ldch=2,stch=3,lw=4,sw=5};
@@ -96,7 +98,7 @@ string dec2hex1(int x){
 		ans+=(r[i]+'0');
 		}
 	}
-	//cout<<"ans "<<ans<<endl;
+	////cin<<"ans "<<ans<<endl;
 	return ans;
 	
 }
@@ -132,7 +134,7 @@ string dec2hex(int j){
 }
 void initOptable(){
 	//ofstream ofile("opcodesPrint.txt");
-	ifstream infile("opcodes.txt");
+	ifstream infile(opFile);
 	string s1 ,s2;
 	char s3;
 	while(!infile.eof()){
@@ -146,11 +148,11 @@ void initOptable(){
 }
 void traverseData(string addr){
 	// the addr is assumed to be in hexadecimal
-	cout<<"incoming address "<<addr<<endl;
+	//cout<<"incoming address "<<addr<<endl;
 	int idx = hex2dec(addr);
-	cout<<"idx "<<idx<<endl;
+	//cout<<"idx "<<idx<<endl;
 	string shrtAddr= addr.substr(2,4);
-	cout<<"shrtAdr "<<shrtAddr<<endl;
+	//cout<<"shrtAdr "<<shrtAddr<<endl;
 	if(idx<maxProgAddrInt){
 		
 		
@@ -164,7 +166,7 @@ void traverseData(string addr){
 			string dataStr;
 			string label = "L";
 			label += shrtAddr;
-			cout<<"label "<<label<<endl;
+			//cout<<"label "<<label<<endl;
 			string opnm;
 			// belongs to data section
 			// loc -> idx
@@ -172,31 +174,31 @@ void traverseData(string addr){
 			// value is calculate on the basis of  
 			// if word then directly use the value of the 3 bytes - hex to binary to decimal
 			if(memType[idx]==word){
-				cout<<"word av"<<endl;
+				//cout<<"word av"<<endl;
 				data+=mem[idx][0];
 				data+=mem[idx][1];
 				data+=mem[idx+1][0];
 				data+=mem[idx+1][1];
 				data+=mem[idx+2][0];
 				data+=mem[idx+2][1];
-				cout<<mem[idx+2][0]<<" ";
-				cout<<mem[idx+2][1]<<endl;
+				//cout<<mem[idx+2][0]<<" ";
+				//cout<<mem[idx+2][1]<<endl;
 				
-				cout<<"data "<<data<<endl;
+				//cout<<"data "<<data<<endl;
 				int dataInt = hex2dec(data);
-				cout<<dataInt<<endl;
+				//cout<<dataInt<<endl;
 				dataStr =NumberToString(dataInt);
-				cout<<dataStr<<endl;
+				//cout<<dataStr<<endl;
 				opnm="WORD";
 			
 				struct stmnt st( idx, label, opnm, dataStr);
-				cout<<idx<<" "<<label<<" "<<opnm<<" "<<dataStr<<endl;
+				//cout<<idx<<" "<<label<<" "<<opnm<<" "<<dataStr<<endl;
 				stmnts.push_back(st);
 				traverseData("00"+dec2hex1(idx+3));
 				return;
 			}
 			else if(memType[idx]==byte){
-				cout<<"byte av"<<endl;
+				//cout<<"byte av"<<endl;
 				int ct=1;
 				int j=idx+1;
 				while(j<maxProgAddrInt){
@@ -223,7 +225,7 @@ void traverseData(string addr){
 				
 			}
 			else if(memType[idx]==resw){
-				cout<<"resw av"<<endl;
+				//cout<<"resw av"<<endl;
 				int ct=1;
 				int j=idx+1;
 				while(j<maxProgAddrInt){
@@ -247,7 +249,7 @@ void traverseData(string addr){
 				
 			}
 			else if(memType[idx]==resb){
-				cout<<"resb av"<<endl;
+				//cout<<"resb av"<<endl;
 				int ct=1;
 				int j=idx+1;
 				while(j<maxProgAddrInt){
@@ -282,7 +284,7 @@ void traverseData(string addr){
 			int ab =idx+3;
 			
 			string a = "00"+dec2hex1(ab);
-			cout<<a<<endl;
+			//cout<<"outgoing addres"<<a<<endl;
 			traverseData(a);
 		}
 	}
@@ -290,38 +292,38 @@ void traverseData(string addr){
 }
 void traverse(string addr){ 
 	// the addr is assumed to be in hexadecimal
-	cout<<"incoming address "<<addr<<endl;
+	//cout<<"incoming address "<<addr<<endl;
 	int idx = hex2dec(addr);
-	cout<<"idx "<<idx<<endl;
+	//cout<<"idx "<<idx<<endl;
 	string shrtAddr= addr.substr(2,4);
-	cout<<"shrtAdr "<<shrtAddr<<endl;
+	//cout<<"shrtAdr "<<shrtAddr<<endl;
 	if(mem[idx][0]!='G' && mem[idx][1]!='G'){
 		
 		if(memType[idx]==code){
 			// exit if it is already seen code
-			cout<<"already code"<<endl;
+			//cout<<"already code"<<endl;
 			return;
 		}
 		
 		else if (memType[idx]==udef){
-			cout<<"in code"<<endl;
+			//cout<<"in code"<<endl;
 			string opcd= "";
 			char otyp;
 			opcd+= mem[idx][0];
 			opcd+=mem[idx][1];	
 			
-			cout<<idx<<endl;
-			cout<<opcd<<endl;
+			//cout<<idx<<endl;
+			//cout<<opcd<<endl;
 			it = optable.find(opcd);
 			string opName;
 			if(it!=optable.end()){
 				opName = (it->second).name;
 				otyp=(it->second).type;
-				cout<<opName<<" "<<otyp<<endl;
+				//cout<<opName<<" "<<otyp<<endl;
 			}
 			else{
 				
-				cout<<"no such opcode "<<opcd<< "with idx "<<idx<<endl;
+				//cout<<"no such opcode "<<opcd<< "with idx "<<idx<<endl;
 			}
 			string shrtAddr= addr.substr(2,4);
 			// add the address bits from the next instruction;
@@ -363,12 +365,12 @@ void traverse(string addr){
 			
 			struct stmnt st(idx, label, opName, opnd);
 			stmnts.push_back(st);
-			cout<<idx<<" "<<label<<" "<<opName<<" "<<opnd<<endl;
-			cout<<opndInt<<endl;
+			//cout<<idx<<" "<<label<<" "<<opName<<" "<<opnd<<endl;
+			//cout<<opndInt<<endl;
 			memType[idx]=code;
 			if(opName=="RSUB")return;
 			memRefer[opndInt]=true;
-			cout<<otyp<<endl;
+			//cout<<otyp<<endl;
 			if(otyp=='2' ){
 				if(memType[opndInt]==udef)
 				//if(memType[opndInt]!=resb && memType[opndInt]!=resw)
@@ -393,7 +395,7 @@ void traverse(string addr){
 				//cout<<"hello jump"<<endl;
 				traverse("00"+opndAddr);
 			}
-			cout<<"the opnd of indx "<<dec2hex1(opndInt)<<" memtype is "<<memType[opndInt]<<endl;
+			//cout<<"the opnd of indx "<<dec2hex1(opndInt)<<" memtype is "<<memType[opndInt]<<endl;
 			// depending on the type of current instruction 
 			
 			
@@ -403,7 +405,7 @@ void traverse(string addr){
 			//string b = dec2hex1(ab);
 			//cout<<b<<endl;
 			string a = "00"+dec2hex1(ab);
-			cout<<a<<endl;
+			//cout<<a<<endl;
 			traverse(a);
 			return;
 		}
@@ -424,7 +426,7 @@ void writeProgram(){
 	// sort the vector
 	// output to file line by line
 	ofstream myfile;
-    myfile.open ("output1.txt");
+    myfile.open (outFile);
     sort(stmnts.begin(), stmnts.end(), less_than_key());
     
     string firstLabel="L";
@@ -464,7 +466,7 @@ int main(){
 	}
 	initOptable();
 	//ifstream infile(filename);
-	ifstream infile("input1.txt");
+	ifstream infile(inpFile);
 	string hr, tr;
 	getline(infile, hr);
 	progName = hr.substr(1, 6);
@@ -509,12 +511,12 @@ int main(){
 		getline(infile, tr); 
 	}
 	firstExecAdd = tr.substr(1,6);
-	cout<<firstExecAdd<<endl;
+	//cout<<firstExecAdd<<endl;
 	traverse(firstExecAdd);
-	cout<<endl;
-	cout<<endl;
-	cout<<endl;
-	cout<<endl;
+	//cout<<endl;
+	//cout<<endl;
+	//cout<<endl;
+	//cout<<endl;
 	
 	traverseData(firstExecAdd);
 	writeProgram();
