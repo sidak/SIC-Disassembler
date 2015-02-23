@@ -178,15 +178,16 @@ void traverseData(string addr){ // the addr is assumed to be in hexadecimal
 			label += shrtAddr;
 			string opnm;
 			
+			
 			if(memType[idx]==word){
-				//cout<<"word av"<<endl;
+				// if the data type is considered to be word
 				data+=mem[idx][0];
 				data+=mem[idx][1];
 				data+=mem[idx+1][0];
 				data+=mem[idx+1][1];
 				data+=mem[idx+2][0];
 				data+=mem[idx+2][1];
-				
+				// convert the data into decimal form
 				int dataInt = hex2dec(data);
 				dataStr =NumberToString(dataInt);
 				opnm="WORD";
@@ -197,9 +198,10 @@ void traverseData(string addr){ // the addr is assumed to be in hexadecimal
 				return;
 			}
 			else if(memType[idx]==byte){
-				//cout<<"byte av"<<endl;
+				// if the data type is considered to be byte
 				int ct=1;
 				int j=idx+1;
+				// find the next unreferenced data memory
 				while(j<maxProgAddrInt){
 					if(memRefer[j]==false){
 						ct++;
@@ -224,9 +226,10 @@ void traverseData(string addr){ // the addr is assumed to be in hexadecimal
 				
 			}
 			else if(memType[idx]==resw){
-				//cout<<"resw av"<<endl;
+				// if the data type is considered to be resw
 				int ct=1;
 				int j=idx+1;
+				// find the next unreferenced data memory
 				while(j<maxProgAddrInt){
 					if(memRefer[j]==false){
 						ct++;
@@ -234,6 +237,7 @@ void traverseData(string addr){ // the addr is assumed to be in hexadecimal
 					}
 					else break;
 				}
+				// 1 word consists of 3 bytes
 				if(ct%3!=0)cout<<"wrong number of res words"<<endl;
 				int temo =ct;
 				ct/=3;
@@ -248,9 +252,10 @@ void traverseData(string addr){ // the addr is assumed to be in hexadecimal
 				
 			}
 			else if(memType[idx]==resb){
-				//cout<<"resb av"<<endl;
+				// if the data type is considered to be resb
 				int ct=1;
 				int j=idx+1;
+				// find the next unreferenced data memory
 				while(j<maxProgAddrInt){
 					if(memRefer[j]==false){
 						ct++;
@@ -343,9 +348,14 @@ void traverse(string addr){ // the addr is assumed to be in hexadecimal
 			
 			memType[idx]=code;
 			
+			// exit the traversal if rsub is encountered
 			if(opName=="RSUB")return;
 			
+			// mark the referred operand 
 			memRefer[opndInt]=true;
+			
+			// mark the memType of the operand as per 
+			// the given instruction
 			if(otyp=='2' ){
 				if(memType[opndInt]==udef)
 				memType[opndInt]=byte;
@@ -365,6 +375,7 @@ void traverse(string addr){ // the addr is assumed to be in hexadecimal
 				}
 			}
 			else if(otyp=='1' || otyp=='0') {
+				// if jump type of instruction
 				traverse("00"+opndAddr);
 			}
 			
@@ -392,10 +403,14 @@ void writeProgram(){
     
     string firstLabel="L";
     firstLabel+=firstExecAdd.substr(2,4);
+    // print start directive 
     myfile<<progName<<"\t"<<"START"<<"\t"<<firstExecAdd.substr(2,4)<<"\n";
+    
     if(!firstExecAdd.empty())stmnts[0].label=firstLabel;
     memRefer[stmnts[0].loc]=true; 
 	int sz = stmnts.size();
+	
+	// print the remaining statements
 	for(int i=0; i<sz; i++){
 		struct stmnt st = stmnts[i];
 		if(memRefer[st.loc]){
@@ -407,10 +422,14 @@ void writeProgram(){
 		myfile<<st.opcode<<"\t";
 		myfile<<st.opnd<<"\n";
 	}
+	
+	// print the end directive
 	myfile<<"\tEND\t"<<firstLabel<<"\n";
 	myfile.close();
 	
 }
+
+// ---------------------- MAIN METHOD ----------------//
 int main(){
 	
 	cout<<"SIC Disassembler\n"<<endl;
