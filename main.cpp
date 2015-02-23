@@ -30,6 +30,7 @@ class stmnt{
 	}
 	
 };
+string progName, progLen, startAdd, firstExecAdd;
 struct opn{
 	string name;
 	char type;
@@ -95,7 +96,7 @@ string dec2hex1(int x){
 		ans+=(r[i]+'0');
 		}
 	}
-	cout<<"ans "<<ans<<endl;
+	//cout<<"ans "<<ans<<endl;
 	return ans;
 	
 }
@@ -145,11 +146,11 @@ void initOptable(){
 }
 void traverseData(string addr){
 	// the addr is assumed to be in hexadecimal
-	cout<<"incoming address "<<addr<<endl;
+	//cout<<"incoming address "<<addr<<endl;
 	int idx = hex2dec(addr);
-	cout<<"idx "<<idx<<endl;
+	//cout<<"idx "<<idx<<endl;
 	string shrtAddr= addr.substr(2,4);
-	cout<<"shrtAdr "<<shrtAddr<<endl;
+	//cout<<"shrtAdr "<<shrtAddr<<endl;
 	if(idx<maxProgAddrInt){
 		
 		
@@ -158,12 +159,12 @@ void traverseData(string addr){
 			// stch -> resb
 			// lda, -> word
 			// sta, -> resw
-			cout<<"in data"<<endl;
+			//cout<<"in data"<<endl;
 			string data="";
 			string dataStr;
 			string label = "L";
 			label += shrtAddr;
-			cout<<"label "<<label<<endl;
+			//cout<<"label "<<label<<endl;
 			string opnm;
 			// belongs to data section
 			// loc -> idx
@@ -171,31 +172,31 @@ void traverseData(string addr){
 			// value is calculate on the basis of  
 			// if word then directly use the value of the 3 bytes - hex to binary to decimal
 			if(memType[idx]==word){
-				cout<<"word av"<<endl;
+				//cout<<"word av"<<endl;
 				data+=mem[idx][0];
 				data+=mem[idx][1];
 				data+=mem[idx+1][0];
 				data+=mem[idx+1][1];
 				data+=mem[idx+2][0];
 				data+=mem[idx+2][1];
-				cout<<mem[idx+2][0]<<" ";
-				cout<<mem[idx+2][1]<<endl;
+				//cout<<mem[idx+2][0]<<" ";
+				//cout<<mem[idx+2][1]<<endl;
 				
-				cout<<"data "<<data<<endl;
+				//cout<<"data "<<data<<endl;
 				int dataInt = hex2dec(data);
-				cout<<dataInt<<endl;
+				//cout<<dataInt<<endl;
 				dataStr =NumberToString(dataInt);
-				cout<<dataStr<<endl;
+				//cout<<dataStr<<endl;
 				opnm="WORD";
 			
 				struct stmnt st( idx, label, opnm, dataStr);
-				cout<<idx<<" "<<label<<" "<<opnm<<" "<<dataStr<<endl;
+				//cout<<idx<<" "<<label<<" "<<opnm<<" "<<dataStr<<endl;
 				stmnts.push_back(st);
 				traverseData("00"+dec2hex1(idx+3));
 				return;
 			}
 			else if(memType[idx]==byte){
-				cout<<"byte av"<<endl;
+				//cout<<"byte av"<<endl;
 				int ct=1;
 				int j=idx+1;
 				while(j<maxProgAddrInt){
@@ -222,7 +223,7 @@ void traverseData(string addr){
 				
 			}
 			else if(memType[idx]==resw){
-				cout<<"resw av"<<endl;
+				//cout<<"resw av"<<endl;
 				int ct=1;
 				int j=idx+1;
 				while(j<maxProgAddrInt){
@@ -246,7 +247,7 @@ void traverseData(string addr){
 				
 			}
 			else if(memType[idx]==resb){
-				cout<<"resb av"<<endl;
+				//cout<<"resb av"<<endl;
 				int ct=1;
 				int j=idx+1;
 				while(j<maxProgAddrInt){
@@ -281,7 +282,7 @@ void traverseData(string addr){
 			int ab =idx+3;
 			
 			string a = "00"+dec2hex1(ab);
-			cout<<a<<endl;
+			//cout<<a<<endl;
 			traverseData(a);
 		}
 	}
@@ -289,34 +290,34 @@ void traverseData(string addr){
 }
 void traverse(string addr){ 
 	// the addr is assumed to be in hexadecimal
-	cout<<"incoming address "<<addr<<endl;
+	//cout<<"incoming address "<<addr<<endl;
 	int idx = hex2dec(addr);
-	cout<<"idx "<<idx<<endl;
+	//cout<<"idx "<<idx<<endl;
 	string shrtAddr= addr.substr(2,4);
-	cout<<"shrtAdr "<<shrtAddr<<endl;
+	//cout<<"shrtAdr "<<shrtAddr<<endl;
 	if(mem[idx][0]!='G' && mem[idx][1]!='G'){
 		
 		if(memType[idx]==code){
 			// exit if it is already seen code
-			cout<<"already code"<<endl;
+			//cout<<"already code"<<endl;
 			return;
 		}
 		
 		else{
-			cout<<"in code"<<endl;
+			//cout<<"in code"<<endl;
 			string opcd= "";
 			char otyp;
 			opcd+= mem[idx][0];
 			opcd+=mem[idx][1];	
 			
-			cout<<idx<<endl;
-			cout<<opcd<<endl;
+			//cout<<idx<<endl;
+			//cout<<opcd<<endl;
 			it = optable.find(opcd);
 			string opName;
 			if(it!=optable.end()){
 				opName = (it->second).name;
 				otyp=(it->second).type;
-				cout<<opName<<" "<<otyp<<endl;
+				//cout<<opName<<" "<<otyp<<endl;
 			}
 			else{
 				
@@ -362,12 +363,12 @@ void traverse(string addr){
 			
 			struct stmnt st(idx, label, opName, opnd);
 			stmnts.push_back(st);
-			cout<<idx<<" "<<label<<" "<<opName<<" "<<opnd<<endl;
-			cout<<opndInt<<endl;
+			//cout<<idx<<" "<<label<<" "<<opName<<" "<<opnd<<endl;
+			//cout<<opndInt<<endl;
 			memType[idx]=code;
 			if(opName=="RSUB")return;
 			memRefer[opndInt]=true;
-			cout<<otyp<<endl;
+			//cout<<otyp<<endl;
 			if(otyp=='2' ){
 				if(memType[opndInt]==udef)
 				//if(memType[opndInt]!=resb && memType[opndInt]!=resw)
@@ -386,13 +387,13 @@ void traverse(string addr){
 				if(memType[opndInt]==udef){
 					memType[opndInt]=resw;
 				}
-				cout<<"resw"<<endl;
+				//cout<<"resw"<<endl;
 			}
 			else if(otyp=='1' || otyp=='0') {
-				cout<<"hello jump"<<endl;
+				//cout<<"hello jump"<<endl;
 				traverse("00"+opndAddr);
 			}
-			cout<<"the opnd of indx "<<dec2hex1(opndInt)<<" memtype is "<<memType[opndInt]<<endl;
+			//cout<<"the opnd of indx "<<dec2hex1(opndInt)<<" memtype is "<<memType[opndInt]<<endl;
 			// depending on the type of current instruction 
 			
 			
@@ -402,7 +403,7 @@ void traverse(string addr){
 			//string b = dec2hex1(ab);
 			//cout<<b<<endl;
 			string a = "00"+dec2hex1(ab);
-			cout<<a<<endl;
+			//cout<<a<<endl;
 			traverse(a);
 			return;
 		}
@@ -424,7 +425,13 @@ void writeProgram(){
 	// output to file line by line
 	ofstream myfile;
     myfile.open ("output.txt");
-    sort(stmnts.begin(), stmnts.end(), less_than_key()); 
+    sort(stmnts.begin(), stmnts.end(), less_than_key());
+    
+    string firstLabel="L";
+    firstLabel+=firstExecAdd.substr(2,4);
+    myfile<<progName<<"\t"<<"START"<<"\t"<<firstExecAdd.substr(2,4)<<"\n";
+    if(!firstExecAdd.empty())stmnts[0].label=firstLabel;
+    memRefer[stmnts[0].loc]=true; 
 	int sz = stmnts.size();
 	for(int i=0; i<sz; i++){
 		struct stmnt st = stmnts[i];
@@ -437,13 +444,13 @@ void writeProgram(){
 		myfile<<st.opcode<<"\t";
 		myfile<<st.opnd<<"\n";
 	}
-	
+	myfile<<"\tEND\t"<<firstLabel<<"\n";
 	myfile.close();
 	
 }
 int main(){
 	char * filename=NULL;
-	string progName, progLen, startAdd, firstExecAdd;
+	
 	
 	//cout<<"Enter the name of the object File "<<endl;
 	//scanf("%s",filename);
@@ -461,14 +468,14 @@ int main(){
 	string hr, tr;
 	getline(infile, hr);
 	progName = hr.substr(1, 6);
-	cout<<progName<<endl;
+	//cout<<progName<<endl;
 	
 	startAdd = hr.substr(7,6);
-	cout<<startAdd<<endl;
+	//cout<<startAdd<<endl;
 	progLen = hr.substr(13,6);
-	cout<<progLen<<endl;
+	//cout<<progLen<<endl;
 	maxProgAddrInt= hex2dec(startAdd) + hex2dec(progLen);
-	cout<<maxProgAddrInt<<endl;
+	//cout<<maxProgAddrInt<<endl;
 	
 	getline(infile, tr);
 	
@@ -476,17 +483,17 @@ int main(){
 	int memStIdx, loopLen;
 	while(tr[0]!='E'){
 		recStartAdd=tr.substr(1,6);
-		cout<<recStartAdd<<endl;
+		//cout<<recStartAdd<<endl;
 		recLen = tr.substr(7,2);
-		cout<<recLen <<endl;
+		//cout<<recLen <<endl;
 		// initialise the mem array with the object code
 		memStIdx = hex2dec(recStartAdd);
 		loopLen=(2*hex2dec(recLen));
-		cout<<memStIdx<<" "<<loopLen<<endl;
+		//cout<<memStIdx<<" "<<loopLen<<endl;
 		int j= memStIdx;
 		int i=0;
 		while(i<loopLen){
-			cout<<"i "<<i<<" j "<<j<<endl;
+			//cout<<"i "<<i<<" j "<<j<<endl;
 			mem[j][0]=tr[9+i];
 			i++;
 			//cout<<"mem 0 "<<mem[j][0]<<endl;
@@ -502,12 +509,12 @@ int main(){
 		getline(infile, tr); 
 	}
 	firstExecAdd = tr.substr(1,6);
-	cout<<firstExecAdd<<endl;
+	//cout<<firstExecAdd<<endl;
 	traverse(firstExecAdd);
-	cout<<endl;
-	cout<<endl;
-	cout<<endl;
-	cout<<endl;
+	//cout<<endl;
+	//cout<<endl;
+	//cout<<endl;
+	//cout<<endl;
 	
 	traverseData(firstExecAdd);
 	writeProgram();
