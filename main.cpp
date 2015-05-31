@@ -11,10 +11,11 @@
 
 using namespace std;
 
-#define maxMem 66000 	// since max memory size of sic machine is 2^15
+#define maxMem 66000 	
+// since max memory size of sic machine is 2^15
 #define outFile "out.txt"
 #define opFile "opcodes.txt"
-// ------------------ CLASSES & STRUCTS --------------- //
+// ------------------ CLASSES & STRUCTS --------------- 
 
 class stmnt{
 	/*
@@ -57,27 +58,34 @@ struct less_than_key
     }
 };
 
-// ------------------ GLOBAL VARIABLES ---------------- //
+// ------------------ GLOBAL VARIABLES ---------------- 
 
-char mem[maxMem][2]; // the memory where the code and data will be loaded in
+// the memory where the code and data will be loaded in
+char mem[maxMem][2]; 
 
-enum stype{ udef,code, byte, resb, word, resw}; // the type of statement
+// the type of statement
+enum stype{ udef,code, byte, resb, word, resw}; 
 
-stype memType[maxMem]; // an array for storing memType
+// an array for storing memType
+stype memType[maxMem]; 
 
-bool memRefer[maxMem]; // an array to check if code or data has been referred
+// an array to check if code or data has been referred
+bool memRefer[maxMem]; 
 
 int maxProgAddrInt; 
 
 string progName, progLen, startAdd, firstExecAdd;
 
-map <string, struct opn > optable; // the optab with key as opcode and value as corresponding opn data
+// the optab with key as opcode and value as corresponding opn data
+map <string, struct opn > optable;
+ 
+// the vector of statements
+vector < stmnt > stmnts; 
 
-vector < stmnt > stmnts; // the vector of statements
+// iterator to the optab
+map<string ,struct opn>::iterator it; 
 
-map<string ,struct opn>::iterator it; // iterator to the optab
-
-// ------------------- HELPER METHODS ---------------//
+// ------------------- HELPER METHODS ---------------
 
 int hex2dec(string str){
     /*
@@ -158,7 +166,8 @@ void initOptable(){
 		optable.insert(pair<string, struct opn > (s2,op));
 	}
 }
-void traverseData(string addr){ // the addr is assumed to be in hexadecimal
+void traverseData(string addr){ 
+	// the addr is assumed to be in hexadecimal
 	
 	/*
 	 * This function is used to iterate over
@@ -283,7 +292,8 @@ void traverseData(string addr){ // the addr is assumed to be in hexadecimal
 	}
 	
 }
-void traverse(string addr){ // the addr is assumed to be in hexadecimal
+void traverse(string addr){ 
+	// the addr is assumed to be in hexadecimal
 	/*
 	 * This function is used to iterate over
 	 * the possible data statements
@@ -429,7 +439,7 @@ void writeProgram(){
 	
 }
 
-// ---------------------- MAIN METHOD ----------------//
+// ---------------------- MAIN METHOD ----------------
 int main(){
 	
 	cout<<"SIC Disassembler\n"<<endl;

@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.cpp</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.cpp</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-preprocessor">#<span class="hljs-keyword">include</span> &lt;iostream&gt;</span>
+<span class="hljs-preprocessor">#<span class="hljs-keyword">include</span> &lt;sstream&gt;</span>
+<span class="hljs-preprocessor">#<span class="hljs-keyword">include</span> &lt;fstream&gt;</span>
+<span class="hljs-preprocessor">#<span class="hljs-keyword">include</span> &lt;stdio.h&gt;</span>
+<span class="hljs-preprocessor">#<span class="hljs-keyword">include</span> &lt;ctype.h&gt;</span>
+<span class="hljs-preprocessor">#<span class="hljs-keyword">include</span> &lt;vector&gt;</span>
+<span class="hljs-preprocessor">#<span class="hljs-keyword">include</span> &lt;map&gt;</span>
+<span class="hljs-preprocessor">#<span class="hljs-keyword">include</span> &lt;algorithm&gt;</span>
+<span class="hljs-preprocessor">#<span class="hljs-keyword">include</span> &lt;stdlib.h&gt;</span>
+<span class="hljs-preprocessor">#<span class="hljs-keyword">include</span> &lt;string&gt;</span>
+
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;
+
+<span class="hljs-preprocessor">#<span class="hljs-keyword">define</span> maxMem 66000 	</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>since max memory size of sic machine is 2^15</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-preprocessor">#<span class="hljs-keyword">define</span> outFile "out.txt"</span>
+<span class="hljs-preprocessor">#<span class="hljs-keyword">define</span> opFile "opcodes.txt"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>————————— CLASSES &amp; STRUCTS ———————- </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="hljs-keyword">class</span> stmnt{
+	<span class="hljs-comment">/*
+	 * This class corresponds to a statement or 
+	 * line of code in the sic program
+	 *
+	 */</span>   
+	<span class="hljs-keyword">public</span>:
+		<span class="hljs-keyword">int</span> loc;
+		<span class="hljs-built_in">string</span> label, opcode, opnd ;
+		stmnt(<span class="hljs-keyword">int</span> l , <span class="hljs-built_in">string</span> lbl, <span class="hljs-built_in">string</span> opcd, <span class="hljs-built_in">string</span> opd){
+			loc=l;
+			label=lbl;
+			opcode=opcd;
+			opnd=opd;
+		}
+	
+};
+
+<span class="hljs-keyword">struct</span> opn{
+	<span class="hljs-comment">/*
+	 * This struct corresponds to an operation
+	 * supported by SIC Machine
+	 * 
+	 */</span>
+	<span class="hljs-built_in">string</span> name;
+	<span class="hljs-keyword">char</span> type;
+};
+
+<span class="hljs-keyword">struct</span> <span class="hljs-keyword">less_t</span>han_key
+{
+	<span class="hljs-comment">/*
+	 * This struct is used as a comparator 
+	 * the struct stmmt
+	 * 
+	 */</span>
+    <span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-keyword">bool</span> <span class="hljs-title">operator</span><span class="hljs-params">()</span> <span class="hljs-params">(<span class="hljs-keyword">const</span> stmnt&amp; struct1, <span class="hljs-keyword">const</span> stmnt&amp; struct2)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> (struct1.loc &lt; struct2.loc);
+    }
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>————————— GLOBAL VARIABLES ———————— </p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>the memory where the code and data will be loaded in</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">char</span> mem[maxMem][<span class="hljs-number">2</span>];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>the type of statement</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">enum</span> stype{ udef,code, byte, resb, word, resw};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>an array for storing memType</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>stype memType[maxMem];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>an array to check if code or data has been referred</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">bool</span> memRefer[maxMem]; 
+
+<span class="hljs-keyword">int</span> maxProgAddrInt; 
+
+<span class="hljs-built_in">string</span> progName, progLen, startAdd, firstExecAdd;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>the optab with key as opcode and value as corresponding opn data</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-built_in">map</span> &lt;<span class="hljs-built_in">string</span>, <span class="hljs-keyword">struct</span> opn &gt; optable;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>the vector of statements</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-built_in">vector</span> &lt; stmnt &gt; stmnts;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>iterator to the optab</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-built_in">map</span>&lt;<span class="hljs-built_in">string</span> ,<span class="hljs-keyword">struct</span> opn&gt;::iterator it;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>—————————- HELPER METHODS ———————-</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">hex2dec</span><span class="hljs-params">(<span class="hljs-built_in">string</span> str)</span></span>{
+    <span class="hljs-comment">/*
+     * Converts a hex string to corresponding int
+     */</span>
+    <span class="hljs-keyword">int</span> l=str.length();
+    <span class="hljs-keyword">int</span> n=<span class="hljs-number">0</span>,d;
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>;i&lt;l;i++){
+        <span class="hljs-keyword">if</span>(<span class="hljs-built_in">isalpha</span>(str[i]))d=str[i]-<span class="hljs-string">'A'</span>+<span class="hljs-number">10</span>;
+        <span class="hljs-keyword">else</span> d=str[i]-<span class="hljs-string">'0'</span>;
+        n=n*<span class="hljs-number">16</span>+d;
+    }
+    <span class="hljs-keyword">return</span> n;
+}
+
+<span class="hljs-function"><span class="hljs-built_in">string</span> <span class="hljs-title">NumberToString</span> <span class="hljs-params">( <span class="hljs-keyword">int</span> Number )</span>
+</span>{
+	<span class="hljs-comment">/*
+	 * Converts an int to a string object
+	 */</span>
+	<span class="hljs-built_in">stringstream</span> ss;
+	ss &lt;&lt; Number;
+	<span class="hljs-keyword">return</span> ss.str();
+}
+<span class="hljs-function"><span class="hljs-built_in">string</span> <span class="hljs-title">dec2hex1</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span>
+</span>{
+	<span class="hljs-comment">/*
+	 * Converts an int to a hex string
+	 */</span>
+	
+	<span class="hljs-keyword">int</span> r[<span class="hljs-number">10</span>],i=<span class="hljs-number">0</span>,number,j=<span class="hljs-number">0</span>;
+	number=x;
+	
+	<span class="hljs-keyword">while</span>(number&gt;<span class="hljs-number">0</span>)
+	{
+		r[i]=number%<span class="hljs-number">16</span>;
+		number=number/<span class="hljs-number">16</span>;
+		i++;
+		j++;
+	}
+	<span class="hljs-built_in">string</span> ans =<span class="hljs-string">""</span>;
+	<span class="hljs-keyword">for</span>(i=j-<span class="hljs-number">1</span>;i&gt;=<span class="hljs-number">0</span>;i--)
+	{
+		<span class="hljs-keyword">if</span>(r[i]==<span class="hljs-number">10</span>)
+			ans+=<span class="hljs-string">'A'</span>;
+		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(r[i]==<span class="hljs-number">11</span>)
+			ans+=<span class="hljs-string">'B'</span>;
+		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(r[i]==<span class="hljs-number">12</span>)
+			ans+=<span class="hljs-string">'C'</span>;
+		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(r[i]==<span class="hljs-number">13</span>)
+			ans+=<span class="hljs-string">'D'</span>;
+		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(r[i]==<span class="hljs-number">14</span>)
+			ans+=<span class="hljs-string">'E'</span>;
+		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(r[i]==<span class="hljs-number">15</span>)
+			ans+=<span class="hljs-string">'F'</span>;
+		<span class="hljs-keyword">else</span>{
+		
+			ans+=(r[i]+<span class="hljs-string">'0'</span>);
+		}
+	}
+	<span class="hljs-keyword">return</span> ans;
+	
+}
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">initOptable</span><span class="hljs-params">()</span></span>{
+	<span class="hljs-comment">/*
+	 * This function initialise the optab
+	 * from the opn data given in file - opFile
+	 */</span>
+	<span class="hljs-function">ifstream <span class="hljs-title">infile</span><span class="hljs-params">(opFile)</span></span>;
+	<span class="hljs-built_in">string</span> s1 ,s2;
+	<span class="hljs-keyword">char</span> s3;
+	<span class="hljs-keyword">while</span>(!infile.eof()){
+		infile&gt;&gt;s1&gt;&gt;s2&gt;&gt;s3;
+		<span class="hljs-keyword">struct</span> opn op ;
+		op.name=s1;
+		op.type=s3;
+		optable.insert(pair&lt;<span class="hljs-built_in">string</span>, <span class="hljs-keyword">struct</span> opn &gt; (s2,op));
+	}
+}
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">traverseData</span><span class="hljs-params">(<span class="hljs-built_in">string</span> addr)</span></span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>the addr is assumed to be in hexadecimal</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	
+	<span class="hljs-comment">/*
+	 * This function is used to iterate over
+	 * the possible data statements
+	 */</span>
+	
+	<span class="hljs-keyword">int</span> idx = hex2dec(addr);
+	<span class="hljs-built_in">string</span> shrtAddr= addr.substr(<span class="hljs-number">2</span>,<span class="hljs-number">4</span>);
+	<span class="hljs-keyword">if</span>(idx&lt;maxProgAddrInt){
+		
+		
+		<span class="hljs-keyword">if</span> (memType[idx]!=udef &amp;&amp; memType[idx]!=code){
+			
+			<span class="hljs-built_in">string</span> data=<span class="hljs-string">""</span>;
+			<span class="hljs-built_in">string</span> dataStr;
+			<span class="hljs-built_in">string</span> label = <span class="hljs-string">"L"</span>;
+			label += shrtAddr;
+			<span class="hljs-built_in">string</span> opnm;
+			
+			
+			<span class="hljs-keyword">if</span>(memType[idx]==word){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>if the data type is considered to be word</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				data+=mem[idx][<span class="hljs-number">0</span>];
+				data+=mem[idx][<span class="hljs-number">1</span>];
+				data+=mem[idx+<span class="hljs-number">1</span>][<span class="hljs-number">0</span>];
+				data+=mem[idx+<span class="hljs-number">1</span>][<span class="hljs-number">1</span>];
+				data+=mem[idx+<span class="hljs-number">2</span>][<span class="hljs-number">0</span>];
+				data+=mem[idx+<span class="hljs-number">2</span>][<span class="hljs-number">1</span>];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>convert the data into decimal form</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">int</span> dataInt = hex2dec(data);
+				dataStr =NumberToString(dataInt);
+				opnm=<span class="hljs-string">"WORD"</span>;
+			
+				<span class="hljs-function"><span class="hljs-keyword">struct</span> stmnt <span class="hljs-title">st</span><span class="hljs-params">( idx, label, opnm, dataStr)</span></span>;
+				stmnts.push_back(st);
+				traverseData(<span class="hljs-string">"00"</span>+dec2hex1(idx+<span class="hljs-number">3</span>));
+				<span class="hljs-keyword">return</span>;
+			}
+			<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(memType[idx]==byte){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>if the data type is considered to be byte</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">int</span> ct=<span class="hljs-number">1</span>;
+				<span class="hljs-keyword">int</span> j=idx+<span class="hljs-number">1</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>find the next unreferenced data memory</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">while</span>(j&lt;maxProgAddrInt){
+					<span class="hljs-keyword">if</span>(memRefer[j]==<span class="hljs-keyword">false</span>){
+						ct++;
+						j++;
+					}
+					<span class="hljs-keyword">else</span> <span class="hljs-keyword">break</span>;
+				}
+				
+				<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i=idx; i&lt;(idx+ct); i++){
+					data+=mem[i][<span class="hljs-number">0</span>];
+					data+=mem[i][<span class="hljs-number">1</span>];
+				}
+				dataStr=<span class="hljs-string">"X'"</span>;
+				dataStr+=data;
+				dataStr+=<span class="hljs-string">"'"</span>;
+				opnm=<span class="hljs-string">"BYTE"</span>;
+				
+				<span class="hljs-function"><span class="hljs-keyword">struct</span> stmnt <span class="hljs-title">st</span><span class="hljs-params">( idx, label, opnm, dataStr)</span></span>;
+				stmnts.push_back(st);
+				traverseData(<span class="hljs-string">"00"</span>+dec2hex1(idx+ct));
+				<span class="hljs-keyword">return</span>;
+				
+			}
+			<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(memType[idx]==resw){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>if the data type is considered to be resw</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">int</span> ct=<span class="hljs-number">1</span>;
+				<span class="hljs-keyword">int</span> j=idx+<span class="hljs-number">1</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>find the next unreferenced data memory</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">while</span>(j&lt;maxProgAddrInt){
+					<span class="hljs-keyword">if</span>(memRefer[j]==<span class="hljs-keyword">false</span>){
+						ct++;
+						j++;
+					}
+					<span class="hljs-keyword">else</span> <span class="hljs-keyword">break</span>;
+				}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>1 word consists of 3 bytes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">if</span>(ct%<span class="hljs-number">3</span>!=<span class="hljs-number">0</span>)<span class="hljs-built_in">cout</span>&lt;&lt;<span class="hljs-string">"wrong number of res words"</span>&lt;&lt;endl;
+				<span class="hljs-keyword">int</span> temo =ct;
+				ct/=<span class="hljs-number">3</span>;
+				
+				dataStr=NumberToString(ct);
+				opnm=<span class="hljs-string">"RESW"</span>;
+				
+				<span class="hljs-function"><span class="hljs-keyword">struct</span> stmnt <span class="hljs-title">st</span><span class="hljs-params">( idx, label, opnm, dataStr)</span></span>;
+				stmnts.push_back(st);
+				traverseData(<span class="hljs-string">"00"</span>+dec2hex1(idx+(temo)));
+				<span class="hljs-keyword">return</span>;
+				
+			}
+			<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(memType[idx]==resb){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>if the data type is considered to be resb</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">int</span> ct=<span class="hljs-number">1</span>;
+				<span class="hljs-keyword">int</span> j=idx+<span class="hljs-number">1</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>find the next unreferenced data memory</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				<span class="hljs-keyword">while</span>(j&lt;maxProgAddrInt){
+					<span class="hljs-keyword">if</span>(memRefer[j]==<span class="hljs-keyword">false</span>){
+						ct++;
+						j++;
+					}
+					<span class="hljs-keyword">else</span> <span class="hljs-keyword">break</span>;
+				}
+								
+				dataStr=NumberToString(ct);
+				opnm=<span class="hljs-string">"RESB"</span>;
+				
+				<span class="hljs-function"><span class="hljs-keyword">struct</span> stmnt <span class="hljs-title">st</span><span class="hljs-params">( idx, label, opnm, dataStr)</span></span>;
+				stmnts.push_back(st);
+				traverseData(<span class="hljs-string">"00"</span>+dec2hex1(idx+ct));
+				<span class="hljs-keyword">return</span>;
+			}
+			
+		}
+		<span class="hljs-keyword">else</span>{
+			
+			<span class="hljs-keyword">int</span> ab =idx+<span class="hljs-number">3</span>;
+			<span class="hljs-built_in">string</span> a = <span class="hljs-string">"00"</span>+dec2hex1(ab);
+			traverseData(a);
+		}
+	}
+	
+}
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">traverse</span><span class="hljs-params">(<span class="hljs-built_in">string</span> addr)</span></span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>the addr is assumed to be in hexadecimal</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="hljs-comment">/*
+	 * This function is used to iterate over
+	 * the possible data statements
+	 */</span>
+	
+	<span class="hljs-keyword">int</span> idx = hex2dec(addr);
+	<span class="hljs-built_in">string</span> shrtAddr= addr.substr(<span class="hljs-number">2</span>,<span class="hljs-number">4</span>);
+	<span class="hljs-keyword">if</span>(mem[idx][<span class="hljs-number">0</span>]!=<span class="hljs-string">'G'</span> &amp;&amp; mem[idx][<span class="hljs-number">1</span>]!=<span class="hljs-string">'G'</span>){
+		
+		<span class="hljs-keyword">if</span>(memType[idx]==code){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>exit if it is already seen code</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			<span class="hljs-keyword">return</span>;
+		}
+		
+		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (memType[idx]==udef){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>encountering the instruction for the first time;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			<span class="hljs-built_in">string</span> opcd= <span class="hljs-string">""</span>;
+			<span class="hljs-keyword">char</span> otyp;
+			opcd+= mem[idx][<span class="hljs-number">0</span>];
+			opcd+=mem[idx][<span class="hljs-number">1</span>];	
+			
+			it = optable.find(opcd);
+			<span class="hljs-built_in">string</span> opName;
+			<span class="hljs-keyword">if</span>(it!=optable.end()){
+				opName = (it-&gt;second).name;
+				otyp=(it-&gt;second).type;
+			}
+			<span class="hljs-keyword">else</span>{
+				<span class="hljs-built_in">cout</span>&lt;&lt;<span class="hljs-string">"no such opcode "</span>&lt;&lt;opcd&lt;&lt; <span class="hljs-string">"with idx "</span>&lt;&lt;idx&lt;&lt;endl;
+			}
+			<span class="hljs-built_in">string</span> shrtAddr= addr.substr(<span class="hljs-number">2</span>,<span class="hljs-number">4</span>);
+			<span class="hljs-built_in">string</span> opnd= <span class="hljs-string">"L"</span>;
+			opnd+=mem[idx+<span class="hljs-number">1</span>][<span class="hljs-number">0</span>];
+			opnd+=mem[idx+<span class="hljs-number">1</span>][<span class="hljs-number">1</span>];
+			opnd+=mem[idx+<span class="hljs-number">2</span>][<span class="hljs-number">0</span>];
+			opnd+=mem[idx+<span class="hljs-number">2</span>][<span class="hljs-number">1</span>];
+			
+			<span class="hljs-built_in">string</span> opndAddr= opnd.substr(<span class="hljs-number">1</span>,<span class="hljs-number">4</span>);
+			<span class="hljs-built_in">string</span> label = <span class="hljs-string">"L"</span>;
+			label+=shrtAddr;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>check if index based addressing </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			<span class="hljs-keyword">int</span> opndInt=hex2dec(opndAddr);
+			<span class="hljs-keyword">if</span>(opndInt&gt;=(<span class="hljs-number">1</span>&lt;&lt;<span class="hljs-number">15</span>)){
+				opndInt-=(<span class="hljs-number">1</span>&lt;&lt;<span class="hljs-number">15</span>);
+				<span class="hljs-keyword">if</span>(opnd[<span class="hljs-number">1</span>]==<span class="hljs-string">'8'</span>)opnd[<span class="hljs-number">1</span>]=<span class="hljs-string">'0'</span>;
+				<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(opnd[<span class="hljs-number">1</span>]==<span class="hljs-string">'9'</span>)opnd[<span class="hljs-number">1</span>]=<span class="hljs-string">'1'</span>;
+				<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(opnd[<span class="hljs-number">1</span>]==<span class="hljs-string">'A'</span>)opnd[<span class="hljs-number">1</span>]=<span class="hljs-string">'2'</span>;
+				<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(opnd[<span class="hljs-number">1</span>]==<span class="hljs-string">'B'</span>)opnd[<span class="hljs-number">1</span>]=<span class="hljs-string">'3'</span>;
+				<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(opnd[<span class="hljs-number">1</span>]==<span class="hljs-string">'C'</span>)opnd[<span class="hljs-number">1</span>]=<span class="hljs-string">'4'</span>;
+				<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(opnd[<span class="hljs-number">1</span>]==<span class="hljs-string">'D'</span>)opnd[<span class="hljs-number">1</span>]=<span class="hljs-string">'5'</span>;
+				<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(opnd[<span class="hljs-number">1</span>]==<span class="hljs-string">'E'</span>)opnd[<span class="hljs-number">1</span>]=<span class="hljs-string">'6'</span>;
+				<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(opnd[<span class="hljs-number">1</span>]==<span class="hljs-string">'F'</span>)opnd[<span class="hljs-number">1</span>]=<span class="hljs-string">'7'</span>;
+				opnd+=<span class="hljs-string">",X"</span>;
+			}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>if rsub inst , clear the operand;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			<span class="hljs-keyword">if</span>(opName ==<span class="hljs-string">"RSUB"</span>)opnd=<span class="hljs-string">"\t"</span>;
+			
+			<span class="hljs-function"><span class="hljs-keyword">struct</span> stmnt <span class="hljs-title">st</span><span class="hljs-params">(idx, label, opName, opnd)</span></span>;
+			stmnts.push_back(st);
+			
+			memType[idx]=code;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>exit the traversal if rsub is encountered</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			<span class="hljs-keyword">if</span>(opName==<span class="hljs-string">"RSUB"</span>)<span class="hljs-keyword">return</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>mark the referred operand </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			memRefer[opndInt]=<span class="hljs-keyword">true</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>mark the memType of the operand as per 
+the given instruction</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>			<span class="hljs-keyword">if</span>(otyp==<span class="hljs-string">'2'</span> ){
+				<span class="hljs-keyword">if</span>(memType[opndInt]==udef)
+				memType[opndInt]=byte;
+			}
+			<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (otyp==<span class="hljs-string">'3'</span>){
+				<span class="hljs-keyword">if</span>(memType[opndInt]==udef){
+					memType[opndInt]=resb;
+				}
+			}
+			<span class="hljs-keyword">if</span>(otyp==<span class="hljs-string">'4'</span> ){
+				<span class="hljs-keyword">if</span>(memType[opndInt]==udef)
+				memType[opndInt]=word;
+			}
+			<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (otyp==<span class="hljs-string">'5'</span>){
+				<span class="hljs-keyword">if</span>(memType[opndInt]==udef){
+					memType[opndInt]=resw;
+				}
+			}
+			<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(otyp==<span class="hljs-string">'1'</span> || otyp==<span class="hljs-string">'0'</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>if jump type of instruction</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>				traverse(<span class="hljs-string">"00"</span>+opndAddr);
+			}
+			
+			<span class="hljs-keyword">int</span> ab =idx+<span class="hljs-number">3</span>;
+			
+			<span class="hljs-built_in">string</span> a = <span class="hljs-string">"00"</span>+dec2hex1(ab);
+			traverse(a);
+			<span class="hljs-keyword">return</span>;
+		}
+		
+	}
+	
+	
+}
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">writeProgram</span><span class="hljs-params">()</span></span>{
+	<span class="hljs-comment">/*
+	 * This function is used to write the
+	 * disassembled statements into the output file
+	 */</span>
+	 
+	ofstream myfile;
+	myfile.open(outFile);
+    sort(stmnts.begin(), stmnts.end(), <span class="hljs-keyword">less_t</span>han_key());
+    
+    <span class="hljs-built_in">string</span> firstLabel=<span class="hljs-string">"L"</span>;
+    firstLabel+=firstExecAdd.substr(<span class="hljs-number">2</span>,<span class="hljs-number">4</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>print start directive </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    myfile&lt;&lt;progName&lt;&lt;<span class="hljs-string">"\t"</span>&lt;&lt;<span class="hljs-string">"START"</span>&lt;&lt;<span class="hljs-string">"\t"</span>&lt;&lt;firstExecAdd.substr(<span class="hljs-number">2</span>,<span class="hljs-number">4</span>)&lt;&lt;<span class="hljs-string">"\n"</span>;
+    
+    <span class="hljs-keyword">if</span>(!firstExecAdd.empty())stmnts[<span class="hljs-number">0</span>].label=firstLabel;
+    memRefer[stmnts[<span class="hljs-number">0</span>].loc]=<span class="hljs-keyword">true</span>; 
+	<span class="hljs-keyword">int</span> sz = stmnts.size();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>print the remaining statements</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>; i&lt;sz; i++){
+		<span class="hljs-keyword">struct</span> stmnt st = stmnts[i];
+		<span class="hljs-keyword">if</span>(memRefer[st.loc]){
+			myfile&lt;&lt;st.label&lt;&lt;<span class="hljs-string">"\t"</span>;
+		}
+		<span class="hljs-keyword">else</span>{
+			myfile&lt;&lt;<span class="hljs-string">"\t"</span>;
+		}
+		myfile&lt;&lt;st.opcode&lt;&lt;<span class="hljs-string">"\t"</span>;
+		myfile&lt;&lt;st.opnd&lt;&lt;<span class="hljs-string">"\n"</span>;
+	}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>print the end directive</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	myfile&lt;&lt;<span class="hljs-string">"\tEND\t"</span>&lt;&lt;firstLabel&lt;&lt;<span class="hljs-string">"\n"</span>;
+	myfile.close();
+	
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>——————————— MAIN METHOD ————————</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>{
+	
+	<span class="hljs-built_in">cout</span>&lt;&lt;<span class="hljs-string">"SIC Disassembler\n"</span>&lt;&lt;endl;
+	<span class="hljs-built_in">cout</span>&lt;&lt;<span class="hljs-string">"\t Made by : "</span>&lt;&lt;endl;
+	<span class="hljs-built_in">cout</span>&lt;&lt;<span class="hljs-string">"\t Sidak Pal Singh "</span>&lt;&lt;endl;
+	<span class="hljs-built_in">cout</span>&lt;&lt;<span class="hljs-string">"\t 13114064 \n"</span>&lt;&lt;endl;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>initialise the memory for code and data</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>; i&lt;maxMem; i++){
+		mem[i][<span class="hljs-number">0</span>]=<span class="hljs-string">'G'</span>;
+		mem[i][<span class="hljs-number">1</span>]=<span class="hljs-string">'G'</span>;
+		memType[i]= udef;
+		memRefer[i]=<span class="hljs-keyword">false</span>;
+	}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>intialise the optab</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	initOptable();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>get file for input</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="hljs-built_in">string</span> fname;
+	<span class="hljs-built_in">cout</span>&lt;&lt;<span class="hljs-string">"Enter the name of the input file "</span>&lt;&lt;endl;
+	<span class="hljs-built_in">cin</span>&gt;&gt;fname;
+	<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *cstr = fname.c_str();
+
+	<span class="hljs-function">ifstream <span class="hljs-title">infile</span><span class="hljs-params">(cstr)</span></span>;
+	<span class="hljs-built_in">string</span> hr, tr;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>read header record</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	getline(infile, hr);
+	progName = hr.substr(<span class="hljs-number">1</span>, <span class="hljs-number">6</span>);
+	startAdd = hr.substr(<span class="hljs-number">7</span>,<span class="hljs-number">6</span>);
+	progLen = hr.substr(<span class="hljs-number">13</span>,<span class="hljs-number">6</span>);
+	maxProgAddrInt= hex2dec(startAdd) + hex2dec(progLen);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p>read text records until you get the end record</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	getline(infile, tr);
+	
+	<span class="hljs-built_in">string</span> recStartAdd, recLen; 
+	<span class="hljs-keyword">int</span> memStIdx, loopLen;
+	<span class="hljs-keyword">while</span>(tr[<span class="hljs-number">0</span>]!=<span class="hljs-string">'E'</span>){
+		recStartAdd=tr.substr(<span class="hljs-number">1</span>,<span class="hljs-number">6</span>);
+		recLen = tr.substr(<span class="hljs-number">7</span>,<span class="hljs-number">2</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <p>initialise the mem array with the object code</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		memStIdx = hex2dec(recStartAdd);
+		loopLen=(<span class="hljs-number">2</span>*hex2dec(recLen));
+		<span class="hljs-keyword">int</span> j= memStIdx;
+		<span class="hljs-keyword">int</span> i=<span class="hljs-number">0</span>;
+		<span class="hljs-keyword">while</span>(i&lt;loopLen){
+			mem[j][<span class="hljs-number">0</span>]=tr[<span class="hljs-number">9</span>+i];
+			i++;
+			mem[j][<span class="hljs-number">1</span>]=tr[<span class="hljs-number">9</span>+i];
+			i++;
+			j++;
+		}
+		getline(infile, tr); 
+	}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <p>parse data from end record </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	firstExecAdd = tr.substr(<span class="hljs-number">1</span>,<span class="hljs-number">6</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>start the visiting of instruction from the first executable instruction </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	traverse(firstExecAdd);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>start iterating over thedata statements</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	traverseData(firstExecAdd);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>write the program to output file</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	writeProgram();
+	
+	<span class="hljs-built_in">cout</span>&lt;&lt;<span class="hljs-string">"Successfully disassembled input object code"</span>&lt;&lt;endl;
+	<span class="hljs-built_in">cout</span>&lt;&lt;<span class="hljs-string">"Check \"out.txt\" file for the output"</span>&lt;&lt;endl;
+}</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
