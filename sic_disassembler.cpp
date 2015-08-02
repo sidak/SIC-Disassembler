@@ -63,9 +63,10 @@ struct less_than_key
 char mem[maxMem][2]; 
 
 // the type of statement
+// udef stands for undefined
 enum stype{ udef,code, byte, resb, word, resw}; 
 
-// an array for storing memType
+// an array for storing statement Type
 stype memType[maxMem]; 
 
 // an array to check if code or data has been referred
@@ -154,6 +155,7 @@ void initOptable(){
 	 * This function initialise the optab
 	 * from the opn data given in file - opFile
 	 */
+	 
 	ifstream infile(opFile);
 	string s1 ,s2;
 	char s3;
@@ -161,6 +163,9 @@ void initOptable(){
 		infile>>s1>>s2>>s3;
 		struct opn op ;
 		op.name=s1;
+		// It corresponds to the value of the underlying 
+		// type associated with an enumerator (in case of 2,3,4,5) of enum stype
+		// and for 0,1 indicates if traversed that statement or not
 		op.type=s3;
 		optable.insert(pair<string, struct opn > (s2,op));
 	}
@@ -271,7 +276,7 @@ void traverseData(string addr){
 					}
 					else break;
 				}
-								
+							
 				dataStr=NumberToString(ct);
 				opnm="RESB";
 				
